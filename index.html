@@ -26,6 +26,26 @@
       <span class="yes">Yes 62¢</span>
       <span class="no">No 38¢</span>
     </div>
+
+    <!-- NEW: button and hidden insights -->
+    <button id="infoBtn">Show game insights</button>
+    <div id="insights" hidden>
+      <ul>
+        <li>Hawks have won 4 of their last 5 games</li>
+        <li>Wolves' starting QB is questionable (ankle)</li>
+        <li>Hawks won the last 3 head-to-head matchups</li>
+      </ul>
+    </div>
   </div>
+
+  <!-- NEW: makes the button work -->
+  <script>
+    const btn = document.getElementById('infoBtn');
+    const box = document.getElementById('insights');
+    btn.onclick = () => {
+      box.hidden = !box.hidden;
+      btn.textContent = box.hidden ? 'Show game insights' : 'Hide game insights';
+    };
+  </script>
 </body>
 </html>
