@@ -8,44 +8,115 @@
     body { font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 20px; }
     h1 { margin: 0 0 4px; }
     .sub { color: #94a3b8; margin: 0 0 20px; }
-    .card { background: #1e293b; border-radius: 12px; padding: 16px; max-width: 420px; }
+    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+    .card { background: #1e293b; border-radius: 12px; padding: 16px; }
+    .league { font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+    h2 { font-size: 20px; margin: 6px 0; }
     .odds { display: flex; justify-content: space-between; margin: 12px 0; font-weight: bold; }
     .yes { color: #22c55e; }
     .no { color: #ef4444; }
     button { background: #3b82f6; color: white; border: 0; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
+    .insights { margin-top: 12px; border-top: 1px solid #334155; padding-top: 12px; font-size: 14px; }
+    .row { margin: 6px 0; }
+    .label { color: #94a3b8; }
+    .take { margin-top: 10px; padding: 10px; border-radius: 8px; background: #0f172a; }
+    .up { color: #22c55e; font-weight: bold; }
+    .down { color: #ef4444; font-weight: bold; }
+    .even { color: #94a3b8; font-weight: bold; }
+    .note { color: #64748b; font-size: 12px; margin-top: 24px; }
   </style>
 </head>
 <body>
   <h1>BetBrief</h1>
   <p class="sub">Extra context before you bet on sports markets</p>
 
-  <div class="card">
-    <h2>Bay City Hawks vs. Lakeview Wolves</h2>
-    <p>Market: Will the Hawks win?</p>
-    <div class="odds">
-      <span class="yes">Yes 62¢</span>
-      <span class="no">No 38¢</span>
-    </div>
+  <div id="games" class="grid"></div>
 
-    <!-- NEW: button and hidden insights -->
-    <button id="infoBtn">Show game insights</button>
-    <div id="insights" hidden>
-      <ul>
-        <li>Hawks have won 4 of their last 5 games</li>
-        <li>Wolves' starting QB is questionable (ankle)</li>
-        <li>Hawks won the last 3 head-to-head matchups</li>
-      </ul>
-    </div>
-  </div>
+  <p class="note">Prototype with sample data. Not betting advice.</p>
 
-  <!-- NEW: makes the button work -->
   <script>
-    const btn = document.getElementById('infoBtn');
-    const box = document.getElementById('insights');
-    btn.onclick = () => {
-      box.hidden = !box.hidden;
-      btn.textContent = box.hidden ? 'Show game insights' : 'Hide game insights';
-    };
+    // ---- GAME DATA: add a game by copying one block ----
+    const games = [
+      {
+        league: "Football", teamA: "Bay City Hawks", teamB: "Lakeview Wolves",
+        question: "Will the Hawks win?", yes: 62, estimate: 68,
+        form: "Hawks: W W L W W · Wolves: L W L L W",
+        injuries: "Wolves starting QB questionable (ankle)",
+        h2h: "Hawks won the last 3 meetings",
+        homeAway: "Hawks are 5-1 at home this season"
+      },
+      {
+        league: "Basketball", teamA: "Riverside Rockets", teamB: "Northgate Bears",
+        question: "Will the Rockets win?", yes: 45, estimate: 41,
+        form: "Rockets: L L W L W · Bears: W W W L W",
+        injuries: "Rockets' top scorer out (hamstring)",
+        h2h: "Split 2-2 in the last 4 meetings",
+        homeAway: "Bears are 7-3 on the road"
+      },
+      {
+        league: "Soccer", teamA: "Port Ellis FC", teamB: "Granite City United",
+        question: "Will Port Ellis win?", yes: 55, estimate: 55,
+        form: "Port Ellis: W D W W L · Granite: D L W D W",
+        injuries: "No major injuries reported",
+        h2h: "Port Ellis unbeaten in the last 5",
+        homeAway: "Port Ellis has scored in 9 straight home games"
+      },
+      {
+        league: "Baseball", teamA: "Summit Peaks", teamB: "Harbor Pilots",
+        question: "Will the Peaks win?", yes: 38, estimate: 46,
+        form: "Peaks: W W W L W · Pilots: L W L W L",
+        injuries: "Pilots' ace pitcher on short rest",
+        h2h: "Peaks won 4 of the last 6",
+        homeAway: "Peaks are 12-8 on the road"
+      }
+    ];
+
+    // ---- BUILD A CARD FOR EACH GAME ----
+    const container = document.getElementById('games');
+
+    games.forEach(g => {
+      const edge = g.estimate - g.yes;
+      let take, cls;
+      if (edge > 3) {
+        take = `Our estimate (${g.estimate}%) is above the market's ${g.yes}%. "Yes" may be underpriced.`;
+        cls = 'up';
+      } else if (edge < -3) {
+        take = `Our estimate (${g.estimate}%) is below the market's ${g.yes}%. "Yes" may be overpriced.`;
+        cls = 'down';
+      } else {
+        take = `Our estimate (${g.estimate}%) is close to the market. No clear edge.`;
+        cls = 'even';
+      }
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="league">${g.league}</div>
+        <h2>${g.teamA} vs. ${g.teamB}</h2>
+        <p>Market: ${g.question}</p>
+        <div class="odds">
+          <span class="yes">Yes ${g.yes}¢</span>
+          <span class="no">No ${100 - g.yes}¢</span>
+        </div>
+        <button>Show game insights</button>
+        <div class="insights" hidden>
+          <div class="row"><span class="label">Recent form:</span> ${g.form}</div>
+          <div class="row"><span class="label">Injuries:</span> ${g.injuries}</div>
+          <div class="row"><span class="label">Head-to-head:</span> ${g.h2h}</div>
+          <div class="row"><span class="label">Home/away:</span> ${g.homeAway}</div>
+          <div class="take"><span class="${cls}">Edge: ${edge > 0 ? '+' : ''}${edge}</span> · ${take}</div>
+        </div>
+      `;
+
+      const btn = card.querySelector('button');
+      const box = card.querySelector('.insights');
+      btn.onclick = () => {
+        box.hidden = !box.hidden;
+        btn.textContent = box.hidden ? 'Show game insights' : 'Hide game insights';
+      };
+
+      container.appendChild(card);
+    });
   </script>
 </body>
 </html>
